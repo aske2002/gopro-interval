@@ -11,14 +11,14 @@ export default function Logo(props: React.SVGProps<SVGSVGElement>) {
           <linearGradient x1="0%" y1="50%" x2="100%" y2="50%" id="svg-gradient">
             <stop offset="0%" stopColor="var(--primary)" />
             <stop
-              stopOpacity="1"
+              stop-opacity="1"
               offset="100%"
-              stopColor="var(--primary-dark)"
+              stop-color="var(--primary-dark)"
             />
           </linearGradient>
         </defs>
         <g
-          fillRule="evenodd"
+          fill-rule="evenodd"
           fill={props.fill || props.style?.fill || "white"}
         >
           <path d="M30.13,247.94h62.13c24.13,0,38.85-5.48,47.78-17.04,13.17-15.78,13.59-41.23,13.59-80.28v-53.3c0-39.04-.42-64.51-13.59-80.28C131.11,5.49,116.39,0,92.26,0H30.13c-1.86,0-3.01.56-3.82,1.38-.83.83-1.39,1.96-1.39,3.84v237.54c0,1.85.56,3,1.39,3.82.81.82,1.96,1.37,3.82,1.37ZM64.33,28.99h21.92c9.67,0,15.43,1.58,19.93,6.94,6.89,8.27,7.5,24.99,7.5,58.68v58.74c0,33.7-.61,50.39-7.5,58.68-4.5,5.36-10.26,6.93-19.93,6.93h-21.92V28.99Z" />

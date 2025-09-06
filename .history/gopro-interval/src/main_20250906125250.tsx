@@ -7,13 +7,11 @@ import { routeTree } from "./routeTree.gen";
 
 import "./styles.css";
 import { Toaster } from "sonner";
-import reportWebVitals from "./reportWebVitals";
 
 // Create a new router instance
 const router = createRouter({
   routeTree,
   context: {},
-  basepath: import.meta.env.BASE_URL,
   defaultPreload: "intent",
   scrollRestoration: true,
   defaultStructuralSharing: true,
