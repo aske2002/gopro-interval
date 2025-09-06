@@ -235,7 +235,7 @@ function App() {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center ${
                 currentStep === 2
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-accent text-accent-foreground"
                   : "bg-muted text-muted-foreground"
               }`}
             >

@@ -31,6 +31,10 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mobile menu when path changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   return (
     <header
@@ -126,7 +130,6 @@ export default function Header() {
                     <AnimatedMobileNavItem
                       key={item.name}
                       href={item.href}
-                      isExternal={item.external}
                       isActive={isActive}
                     >
                       {item.name}

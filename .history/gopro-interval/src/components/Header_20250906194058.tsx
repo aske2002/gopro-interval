@@ -126,7 +126,6 @@ export default function Header() {
                     <AnimatedMobileNavItem
                       key={item.name}
                       href={item.href}
-                      isExternal={item.external}
                       isActive={isActive}
                     >
                       {item.name}

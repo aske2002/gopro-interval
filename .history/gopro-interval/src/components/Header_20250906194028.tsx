@@ -31,6 +31,10 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mobile menu when path changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   return (
     <header
@@ -118,7 +122,16 @@ export default function Header() {
               className="md:hidden overflow-hidden row-start-2"
             >
               <div className="py-4 space-y-1">
-              
+                {/* Mobile Search */}
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="search"
+                    placeholder="Search..."
+                    className="pl-9 bg-gray-50 border border-gray-200"
+                  />
+                </div>
+
                 {/* Mobile Nav Links - Now with animated mobile nav items */}
                 {navigationItems.map((item) => {
                   const isActive = pathname === item.href;
@@ -126,7 +139,6 @@ export default function Header() {
                     <AnimatedMobileNavItem
                       key={item.name}
                       href={item.href}
-                      isExternal={item.external}
                       isActive={isActive}
                     >
                       {item.name}

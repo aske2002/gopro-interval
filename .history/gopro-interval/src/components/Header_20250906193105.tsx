@@ -31,24 +31,22 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mobile menu when path changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out flex items-center",
-        isScrolled || isMobileMenuOpen
-          ? "bg-white/90 backdrop-blur-md shadow-sm"
-          : "bg-white/90 backdrop-blur-sm"
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out h-18 flex items-center",
+        isScrolled
+          ? "bg-white/90 backdrop-blur-md shadow-sm py-2"
+          : "bg-white/90 backdrop-blur-sm h-20"
       )}
     >
-      <div className="w-full px-6 md:px-12 lg:px-16 grid grid-rows-[auto_auto]">
-        {/* auto size rows */}
-        <div
-          className={cn(
-            "flex transition-all duration-300 ease-in-out items-center gap-2 grow justify-between h-18 row-start-1",
-            isScrolled || isMobileMenuOpen ? "py-2" : "h-20"
-          )}
-        >
+      <div className="w-full px-6 md:px-12 lg:px-16 flex items-center">
+        <div className="flex items-center gap-2 grow justify-between">
           <div className="flex items-center gap-10">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
@@ -91,6 +89,18 @@ export default function Header() {
           </div>
 
           <div className="flex items-center justify-end space-x-4">
+            {/* <div className="hidden md:flex relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+              <Input
+                type="search"
+                placeholder="Search..."
+                className="pl-9 w-[180px] lg:w-[240px] h-9 bg-gray-50 border border-gray-200 focus-visible:ring-1 focus-visible:ring-violet-500"
+              />
+            </div>
+
+            <FluidNotificationsDropdown />
+
+            <FluidAccountDropdown user={user} /> */}
 
             {/* Mobile menu button */}
             <Button
@@ -108,6 +118,7 @@ export default function Header() {
           </div>
         </div>
 
+        {/* Mobile Navigation Menu */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
@@ -115,10 +126,19 @@ export default function Header() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden overflow-hidden row-start-2"
+              className="md:hidden overflow-hidden absolute top-full  w-full"
             >
               <div className="py-4 space-y-1">
-              
+                {/* Mobile Search */}
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="search"
+                    placeholder="Search..."
+                    className="pl-9 bg-gray-50 border border-gray-200"
+                  />
+                </div>
+
                 {/* Mobile Nav Links - Now with animated mobile nav items */}
                 {navigationItems.map((item) => {
                   const isActive = pathname === item.href;
@@ -126,7 +146,6 @@ export default function Header() {
                     <AnimatedMobileNavItem
                       key={item.name}
                       href={item.href}
-                      isExternal={item.external}
                       isActive={isActive}
                     >
                       {item.name}
