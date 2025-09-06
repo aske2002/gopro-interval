@@ -11,20 +11,18 @@ interface AnimatedMobileNavItemProps {
   href: string;
   isActive: boolean;
   children: React.ReactNode;
-  isExternal?: boolean;
 }
 
 export default function AnimatedMobileNavItem({
   href,
   isActive,
   children,
-  isExternal,
+  isExternal
 }: AnimatedMobileNavItemProps) {
   const [isPressed, setIsPressed] = useState(false);
 
   return (
     <Link
-      onClick={isExternal ? () => window.open(href, "_blank") : undefined}
       to={href}
       className={cn(
         "block relative px-3 py-2.5 rounded-md text-base font-medium transition-all duration-200",
