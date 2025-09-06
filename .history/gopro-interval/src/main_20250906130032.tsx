@@ -13,7 +13,7 @@ import reportWebVitals from "./reportWebVitals";
 const router = createRouter({
   routeTree,
   context: {},
-  basepath: import.meta.env.PROD ? "/home" : "/",
+  basepath: import.meta.env.BASE_URL,
   defaultPreload: "intent",
   scrollRestoration: true,
   defaultStructuralSharing: true,

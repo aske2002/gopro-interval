@@ -14,7 +14,7 @@ export default defineConfig({
     tailwindcss(),
   ],
   build: {
-    outDir: "..",
+    outDir: "../home",
     rollupOptions: {
       output: {
         // assets go inside dist/assets

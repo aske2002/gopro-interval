@@ -14,17 +14,8 @@ export default defineConfig({
     tailwindcss(),
   ],
   build: {
-    outDir: "..",
-    rollupOptions: {
-      output: {
-        // assets go inside dist/assets
-        
-        assetFileNames: "assets/[name]-[hash][extname]",
-        chunkFileNames: "assets/[name]-[hash].js",
-        entryFileNames: "assets/[name]-[hash].js",
-      },
-    }
-  },
+    outDir: "../home"
+  }
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
