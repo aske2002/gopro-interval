@@ -5,40 +5,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { QrCodeDisplay } from "@/components/qr-code-display";
 import { Clock, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useEffect, useMemo, useState } from "react";
-import {
-  formatAsDateTimeString,
-  getTimeFormattedForCommand,
-} from "@/lib/gopro/utils";
-import { EnumAndLabelSelect } from "./enum-and-label-select";
+import { formatAsDateTimeString } from "@/lib/gopro/utils";
 
 interface TimeSettingCardProps {
-  timeChanged?: (newTime: Date) => void;
+  time: Date;
 }
 
-export function TimeSettingCard({ timeChanged }: TimeSettingCardProps) {
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (timeChanged) {
-      timeChanged(currentTime);
-    }
-  }, [currentTime, timeChanged]);
-
-  const command = useMemo(() => {
-    return getTimeFormattedForCommand(currentTime);
-  }, [currentTime]);
-
+export function TimeSettingCard({ time }: TimeSettingCardProps) {
   return (
     <div className="space-y-6">
       <Card>
@@ -67,10 +42,9 @@ export function TimeSettingCard({ timeChanged }: TimeSettingCardProps) {
             <Info className="h-4 w-4" />
             <AlertDescription>
               This QR code will set your GoPro's internal clock to the current
-              time: <strong>{formatAsDateTimeString(currentTime)}</strong>
+              time: <strong>{formatAsDateTimeString(time)}</strong>
             </AlertDescription>
           </Alert>
-          <QrCodeDisplay title="Time Sync" command={command} />
         </CardContent>
       </Card>
     </div>

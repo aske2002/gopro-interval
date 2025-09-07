@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Trash2, Settings, Terminal } from "lucide-react";
 import type { NewRecordingPreset, RecordingPreset } from "@/routes/index";
-import { TimeSpan } from "@/lib/timeSpan";
+import { TimeOfDay, TimeSpan } from "@/lib/timeSpan";
 import {
   allCameraModels,
   calculateSupportedCamerasForSettings,
@@ -37,14 +37,17 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 export const parsePreset = (preset: any): RecordingPreset => ({
   ...preset,
+
   recordDuration: TimeSpan.fromString(preset.recordDuration),
   intervalDuration: TimeSpan.fromString(preset.intervalDuration),
   startTime:
     preset.type === "dynamic"
-      ? TimeSpan.fromString(preset.startTime)
+      ? TimeOfDay.fromString(preset.startTime)
       : undefined,
   endTime:
-    preset.type === "dynamic" ? TimeSpan.fromString(preset.endTime) : undefined,
+    preset.type === "dynamic"
+      ? TimeOfDay.fromString(preset.endTime)
+      : undefined,
 });
 
 const loadCustomPresets = (): RecordingPreset[] => {
@@ -66,8 +69,8 @@ const saveCustomPresets = (presets: RecordingPreset[]) => {
 
 interface PresetManagerProps {
   currentSettings: NewRecordingPreset;
-  onPresetSelect: (preset: RecordingPreset) => void;
-  selectedPreset: string;
+  onPresetSelect?: (preset: RecordingPreset) => void;
+  selectedPreset: string | undefined;
 }
 
 const defaultPresets: RecordingPreset[] = [
@@ -76,8 +79,8 @@ const defaultPresets: RecordingPreset[] = [
     name: "Record only day 2/60",
     recordDuration: TimeSpan.fromMinutes(2), // 2 minutes
     intervalDuration: TimeSpan.fromMinutes(58),
-    startTime: TimeSpan.fromString("07:00"),
-    endTime: TimeSpan.fromString("20:00"),
+    startTime: TimeOfDay.fromString("07:00"),
+    endTime: TimeOfDay.fromString("20:00"),
     resolution: VideoResolutions.R2_7K,
     lensWidth: LensFov.Wide,
     framerate: VideoFrameRates.FPS30,
@@ -88,8 +91,8 @@ const defaultPresets: RecordingPreset[] = [
     name: "Record only day 2/30",
     recordDuration: TimeSpan.fromMinutes(2), // 2 minutes
     intervalDuration: TimeSpan.fromMinutes(28),
-    startTime: TimeSpan.fromString("07:00"),
-    endTime: TimeSpan.fromString("20:00"),
+    startTime: TimeOfDay.fromString("07:00"),
+    endTime: TimeOfDay.fromString("20:00"),
     resolution: VideoResolutions.R2_7K,
     lensWidth: LensFov.Wide,
     framerate: VideoFrameRates.FPS30,
@@ -99,11 +102,13 @@ const defaultPresets: RecordingPreset[] = [
     id: "testing",
     name: "Night and day (for testing)",
     recordDuration: TimeSpan.fromSeconds(10), // 2 minutes
-    intervalDuration: TimeSpan.fromHMS(0, 1, 50),
+    intervalDuration: TimeSpan.fromHoursMinutesSeconds(0, 1, 50),
     resolution: VideoResolutions.R2_7K,
     lensWidth: LensFov.Wide,
     framerate: VideoFrameRates.FPS30,
     type: "constant",
+    startTime: undefined,
+    endTime: undefined,
   },
   {
     id: "night-and-day-1",
@@ -114,6 +119,8 @@ const defaultPresets: RecordingPreset[] = [
     lensWidth: LensFov.Wide,
     framerate: VideoFrameRates.FPS30,
     type: "constant",
+    startTime: undefined,
+    endTime: undefined,
   },
   {
     id: "night-and-day-2",
@@ -124,9 +131,11 @@ const defaultPresets: RecordingPreset[] = [
     lensWidth: LensFov.Wide,
     framerate: VideoFrameRates.FPS30,
     type: "constant",
+    startTime: undefined,
+    endTime: undefined,
   },
   {
-    id: "night-and-day-2",
+    id: "night-and-day-3",
     name: "Night and day 2/60",
     recordDuration: TimeSpan.fromMinutes(2), // 2 minutes
     intervalDuration: TimeSpan.fromMinutes(58),
@@ -134,6 +143,8 @@ const defaultPresets: RecordingPreset[] = [
     lensWidth: LensFov.Wide,
     framerate: VideoFrameRates.FPS30,
     type: "constant",
+    startTime: undefined,
+    endTime: undefined,
   },
 ];
 
@@ -241,7 +252,7 @@ export function PresetManager({
                     ? "border-accent bg-accent/10"
                     : "border-border"
                 }`}
-                onClick={() => onPresetSelect(preset)}
+                onClick={() => onPresetSelect?.(preset)}
               >
                 <div className="space-y-2">
                   <h4 className="font-medium">{preset.name}</h4>
@@ -348,7 +359,7 @@ export function PresetManager({
                     <div className="flex items-center justify-between">
                       <h4
                         className="font-medium"
-                        onClick={() => onPresetSelect(preset)}
+                        onClick={() => onPresetSelect?.(preset)}
                       >
                         {preset.name}
                       </h4>
@@ -365,7 +376,7 @@ export function PresetManager({
                     </div>
                     <div
                       className="text-sm text-muted-foreground space-y-1"
-                      onClick={() => onPresetSelect(preset)}
+                      onClick={() => onPresetSelect?.(preset)}
                     >
                       <div>
                         Record:{" "}

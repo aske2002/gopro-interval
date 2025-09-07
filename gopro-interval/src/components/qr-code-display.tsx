@@ -12,17 +12,23 @@ import { toast } from "sonner";
 import QRCode from "qrcode";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 as uuid } from "uuid";
+import { cn } from "@/lib/utils";
 
 interface QRCodeDisplayProps {
   title: string;
   command: string;
   description?: string;
+  qrDataRef?: React.RefObject<string | null>;
+  disAllowEnlargement?: boolean;
+  className?: string;
 }
 
 export function QrCodeDisplay({
   title,
+  className,
   command,
-  description,
+  qrDataRef,
+  disAllowEnlargement,
 }: QRCodeDisplayProps) {
   const id = useRef(uuid());
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
@@ -36,6 +42,9 @@ export function QrCodeDisplay({
         margin: 0,
       });
       setQrDataUrl(qr);
+      if (qrDataRef) {
+        qrDataRef.current = qr;
+      }
     } catch (error) {
       console.error("Failed to generate QR code:", error);
       toast.error("Failed to generate QR code", {
@@ -49,6 +58,70 @@ export function QrCodeDisplay({
   useEffect(() => {
     generateQRCode();
   }, [command]);
+
+  return (
+    <div className={cn("flex justify-center p-4 bg-white rounded-lg border-2 border-dashed border-border h-48", className)}>
+      {qrDataUrl ? (
+        <AnimatePresence>
+          {qrDataUrl && (
+            <>
+              <motion.img
+                layoutId={id.current}
+                onClick={() => !disAllowEnlargement && setExpanded(true)}
+                src={qrDataUrl}
+                alt={`QR Code for ${title}`}
+                draggable={false}
+                className={cn(
+                  `object-contain select-none`,
+                  disAllowEnlargement ? "" : "cursor-pointer"
+                )}
+              />
+
+              {expanded && (
+                <>
+                  {/* Backdrop */}
+                  <motion.div
+                    className="fixed inset-0 bg-black/75 z-50"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setExpanded(false)}
+                  />
+
+                  {/* Expanded QR */}
+                  <motion.img
+                    layoutId={id.current}
+                    src={qrDataUrl}
+                    alt={`QR Code for ${title}`}
+                    className="fixed inset-0 m-auto w-4/5 md:w-1/2 z-51 rounded-xl cursor-pointer p-8 bg-white"
+                    onClick={() => setExpanded(false)}
+                    transition={{
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 20,
+                    }}
+                  />
+                </>
+              )}
+            </>
+          )}
+        </AnimatePresence>
+      ) : (
+        <div className="w-48 h-48 bg-muted rounded-lg flex items-center justify-center">
+          <QrCode className="h-12 w-12 text-muted-foreground" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function QRCodeDisplayCard({
+  title,
+  command,
+  description,
+  disAllowEnlargement,
+}: QRCodeDisplayProps) {
+  const qrDataRef = useRef<string>(null);
 
   const copyToClipboard = async () => {
     try {
@@ -64,9 +137,9 @@ export function QrCodeDisplay({
   };
 
   const downloadQR = () => {
-    if (qrDataUrl) {
+    if (qrDataRef.current) {
       const link = document.createElement("a");
-      link.href = qrDataUrl;
+      link.href = qrDataRef.current;
       link.download = `gopro-${title.toLowerCase().replace(/\s+/g, "-")}.png`;
       document.body.appendChild(link);
       link.click();
@@ -74,101 +147,6 @@ export function QrCodeDisplay({
     }
   };
 
-  return (
-    <div className="space-y-4">
-      {description && (
-        <p className="text-sm text-muted-foreground">{description}</p>
-      )}
-      <div className="flex justify-center p-4 bg-white rounded-lg border-2 border-dashed border-border">
-        {qrDataUrl ? (
-          <div>
-            <AnimatePresence>
-              {qrDataUrl && (
-                <>
-                  <motion.img
-                    layoutId={id.current}
-                    onClick={() => setExpanded(true)}
-                    src={qrDataUrl}
-                    alt={`QR Code for ${title}`}
-                    className="w-48 h-48 cursor-pointer rounded-lg"
-                  />
-
-                  {expanded && (
-                    <>
-                      {/* Backdrop */}
-                      <motion.div
-                        className="fixed inset-0 bg-black/75 z-50"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setExpanded(false)}
-                      />
-
-                      {/* Expanded QR */}
-                      <motion.img
-                        layoutId={id.current}
-                        src={qrDataUrl}
-                        alt={`QR Code for ${title}`}
-                        className="fixed inset-0 m-auto w-1/2 z-51 rounded-xl cursor-pointer p-8 bg-white"
-                        onClick={() => setExpanded(false)}
-                        transition={{
-                          type: "spring",
-                          stiffness: 200,
-                          damping: 20,
-                        }}
-                      />
-                    </>
-                  )}
-                </>
-              )}
-            </AnimatePresence>
-          </div>
-        ) : (
-          <div className="w-48 h-48 bg-muted rounded-lg flex items-center justify-center">
-            <QrCode className="h-12 w-12 text-muted-foreground" />
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-muted-foreground">
-          GoPro Labs Command:
-        </label>
-        <div className="p-3 bg-muted rounded-lg font-mono text-sm break-all">
-          {command}
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-2">
-        <Button
-          onClick={copyToClipboard}
-          variant="outline"
-          size="sm"
-          className="flex-1 bg-transparent"
-        >
-          <Copy className="h-4 w-4 mr-2" />
-          Copy
-        </Button>
-        <Button
-          onClick={downloadQR}
-          variant="outline"
-          size="sm"
-          className="flex-1 bg-transparent"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Download
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-export function QRCodeDisplayCard({
-  title,
-  command,
-  description,
-}: QRCodeDisplayProps) {
   return (
     <Card className="bg-white shadow-lg">
       <CardHeader>
@@ -179,7 +157,42 @@ export function QRCodeDisplayCard({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <QrCodeDisplay title={title} command={command} />
+        <QrCodeDisplay
+          disAllowEnlargement={disAllowEnlargement}
+          qrDataRef={qrDataRef}
+          title={title}
+          command={command}
+        />
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">
+            GoPro Labs Command:
+          </label>
+          <div className="p-3 bg-muted rounded-lg font-mono text-sm break-all">
+            {command}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            onClick={copyToClipboard}
+            variant="outline"
+            size="sm"
+            className="flex-1 bg-transparent"
+          >
+            <Copy className="h-4 w-4 mr-2" />
+            Copy
+          </Button>
+          <Button
+            onClick={downloadQR}
+            variant="outline"
+            size="sm"
+            className="flex-1 bg-transparent"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Download
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

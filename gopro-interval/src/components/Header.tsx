@@ -1,41 +1,51 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, type Ref } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import AnimatedNavItem from "./animated-nav-item";
 import AnimatedMobileNavItem from "./animated-mobile-nav-item";
 import { Link, useLocation } from "@tanstack/react-router";
 import Logo from "./ui/logo";
+import { ModeSwitch } from "./mode-switch";
 
 // Navigation items
 const navigationItems = [
   { name: "Home", href: "/" },
+  { name: "About", href: "/about" },
   { name: "Legacy", href: "./gopro.html", external: true },
 ];
 
-export default function Header() {
+interface HeaderProps {
+  scrollElement?: React.RefObject<HTMLElement | null>;
+}
+
+export default function Header({ scrollElement }: HeaderProps) {
   const { pathname } = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Handle scroll effect
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+    const target = scrollElement?.current || window;
+
+    const handleScroll = (e: Event) => {
+      const scrollTop =
+        target === window
+          ? window.scrollY
+          : (target as HTMLDivElement).scrollTop;
+      setIsScrolled(scrollTop > 10);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
+    target.addEventListener("scroll", handleScroll);
+    return () => target.removeEventListener("scroll", handleScroll);
+  }, [scrollElement?.current]);
 
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out flex items-center",
+        "w-full z-50 transition-all duration-300 ease-in-out flex items-center",
         isScrolled || isMobileMenuOpen
           ? "bg-white/90 backdrop-blur-md shadow-sm"
           : "bg-white/90 backdrop-blur-sm"
@@ -91,8 +101,7 @@ export default function Header() {
           </div>
 
           <div className="flex items-center justify-end space-x-4">
-
-            {/* Mobile menu button */}
+            <ModeSwitch />
             <Button
               variant="ghost"
               size="icon"
@@ -118,7 +127,6 @@ export default function Header() {
               className="md:hidden overflow-hidden row-start-2"
             >
               <div className="py-4 space-y-1">
-              
                 {/* Mobile Nav Links - Now with animated mobile nav items */}
                 {navigationItems.map((item) => {
                   const isActive = pathname === item.href;

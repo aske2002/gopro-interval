@@ -17,7 +17,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Clock, Check, X } from "lucide-react";
-import { TimeSpan } from "@/lib/timeSpan";
+import { TimeOfDay, TimeSpan } from "@/lib/timeSpan";
 
 /**
  * Beautiful, accessible Time Picker for shadcn/ui
@@ -36,8 +36,8 @@ import { TimeSpan } from "@/lib/timeSpan";
 export interface TimePickerProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
   /** Canonical value in 24h format: "HH:mm" (e.g. "09:30"), or null */
-  value?: TimeSpan | null;
-  onChange?: (value: TimeSpan | null) => void;
+  value?: TimeOfDay | null;
+  onChange?: (value: TimeOfDay | null) => void;
   /** Display format */
   /** Minute step for the minute column */
   minuteStep?: number;
@@ -71,8 +71,8 @@ export function TimePicker({
   const [open, setOpen] = React.useState(false);
 
   const { hour, minute } = React.useMemo(() => {
-    let val = value || TimeSpan.fromHours(12);
-    const { hours, minutes } = val.toHMS();
+    let val = value || TimeOfDay.fromHours(12);
+    const { hours, minutes } = val.hoursMinutesSeconds;
     return { hour: hours, minute: minutes };
   }, [value]);
 
@@ -88,14 +88,12 @@ export function TimePicker({
     );
   }, [minuteStep]);
 
-  const [filter, setFilter] = React.useState("");
-
   function commit(newMins: number | null) {
     if (onChange) {
       if (newMins == null) {
         onChange(null);
       } else {
-        onChange(TimeSpan.fromMinutes(newMins));
+        onChange(TimeOfDay.fromMinutes(newMins));
       }
     }
   }
@@ -143,15 +141,6 @@ export function TimePicker({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[320px] sm:w-[360px] p-0" align="start">
-          <div className="p-2">
-            <Input
-              placeholder="Type to filter (e.g. 9:3, 14, pm)"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="h-9"
-              autoFocus
-            />
-          </div>
           <Separator />
           <div className="grid grid-cols-2">
             <Column
@@ -160,7 +149,6 @@ export function TimePicker({
               selected={hour}
               render={(h) => pad(h)}
               onSelect={setHour}
-              filter={filter}
             />
             <Column
               title="Minute"
@@ -168,7 +156,6 @@ export function TimePicker({
               selected={minute}
               render={(m) => pad(m)}
               onSelect={setMinute}
-              filter={filter}
             />
           </div>
           <Separator />
@@ -179,7 +166,7 @@ export function TimePicker({
             <div className="flex items-center gap-2">
               <Button
                 type="button"
-                variant="secondary"
+                variant="default"
                 size="sm"
                 onClick={() => setOpen(false)}
               >
@@ -187,7 +174,7 @@ export function TimePicker({
               </Button>
               <Button
                 type="button"
-                variant="default"
+                variant="secondary"
                 size="sm"
                 onClick={setNow}
               >
@@ -233,11 +220,13 @@ function Column<T>({
         {title}
       </div>
       <Command shouldFilter={false} className="max-h-60 overflow-auto">
-        <CommandInput
-          value={value}
-          onValueChange={setValue}
-          placeholder={`Filter ${title.toLowerCase()}...`}
-        />
+        {filter && (
+          <CommandInput
+            value={value}
+            onValueChange={setValue}
+            placeholder={`Filter ${title.toLowerCase()}...`}
+          />
+        )}
         <CommandList>
           <CommandEmpty>No results.</CommandEmpty>
           <CommandGroup>
@@ -248,6 +237,10 @@ function Column<T>({
                 <CommandItem
                   key={idx}
                   value={label}
+                  className={cn(
+                    "cursor-pointer",
+                    isSelected && "font-medium bg-primary/10"
+                  )}
                   onSelect={() => onSelect(it)}
                 >
                   <span className="truncate">{label}</span>

@@ -1,5 +1,5 @@
 import type { NewRecordingPreset } from "@/routes";
-import { TimeSpan } from "../timeSpan";
+import { TimeOfDay, TimeSpan } from "../timeSpan";
 import {
   type LensFov,
   type VideoFrameRates,
@@ -37,8 +37,8 @@ const generateCameraSettingsCommand = (
 };
 
 export const generateDynamicIntervalCommand = (
-  startTime: TimeSpan,
-  endTime: TimeSpan,
+  startTime: TimeOfDay,
+  endTime: TimeOfDay,
   recordTimeS: TimeSpan,
   pauseTimeS: TimeSpan,
   resolution: VideoResolutions,
@@ -48,7 +48,8 @@ export const generateDynamicIntervalCommand = (
 ): string => {
   const start = startTime.toString("HH:MM");
   const end = endTime.toString("HH:MM");
-  return `>${start}<${end}${generateCameraSettingsCommand(resolution, framerate, lensFov)}!S!${recordTimeS.totalSeconds}E!${delayS}N!${pauseTimeS.totalSeconds}RQ!${start}R`;
+  const endWithBuffer = endTime.add(TimeSpan.fromMinutes(1)).toString("HH:MM");
+  return `>${start}<${end}${generateCameraSettingsCommand(resolution, framerate, lensFov)}!S!${recordTimeS.totalSeconds}E!${delayS}N!${pauseTimeS.totalSeconds}RQ~!${endWithBuffer}N!${start}R`;
 };
 
 export const generateConstantIntervalCommand = (
